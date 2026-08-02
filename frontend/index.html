@@ -6,9 +6,7 @@
 <meta property="og:image" content="https://noelhazuki.github.io/claude-gallery/ogp/checklist-memo.png">
 <title>チェックリストメモ</title>
 <style>
-  :root {
-    --font-scale: 1;
-  }
+  :root { --font-scale: 1; }
   * { box-sizing: border-box; }
   body {
     margin: 0;
@@ -18,10 +16,7 @@
     padding: 16px;
     padding-bottom: 60px;
   }
-  h1 {
-    font-size: 18px;
-    margin: 4px 0 12px;
-  }
+  h1 { font-size: 18px; margin: 4px 0 12px; }
   .panel {
     background: #fff;
     border-radius: 16px;
@@ -29,164 +24,61 @@
     box-shadow: 0 2px 6px rgba(0,0,0,0.06);
     margin-bottom: 16px;
   }
-  .panel-label {
-    font-size: 12px;
-    color: #999;
-    margin-bottom: 6px;
-    font-weight: bold;
-  }
-  .board-row {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    flex-wrap: wrap;
-  }
+  .panel-label { font-size: 12px; color: #999; margin-bottom: 6px; font-weight: bold; }
+  .board-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
   select {
-    flex: 1;
-    min-width: 120px;
-    padding: 8px 10px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    font-size: 15px;
-    background: #fff;
+    flex: 1; min-width: 120px; padding: 8px 10px; border-radius: 8px;
+    border: 1px solid #ddd; font-size: 15px; background: #fff;
   }
   .icon-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    background: #fafafa;
-    font-size: 16px;
-    cursor: pointer;
-    flex-shrink: 0;
+    width: 38px; height: 38px; border-radius: 8px; border: 1px solid #ddd;
+    background: #fafafa; font-size: 16px; cursor: pointer; flex-shrink: 0;
   }
   .icon-btn:active { opacity: 0.7; }
-  .font-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-top: 10px;
-  }
+  .font-row { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
   .font-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 8px;
-    border: 1px solid #ddd;
-    background: #fafafa;
-    font-size: 16px;
-    font-weight: bold;
-    cursor: pointer;
+    width: 38px; height: 38px; border-radius: 8px; border: 1px solid #ddd;
+    background: #fafafa; font-size: 16px; font-weight: bold; cursor: pointer;
   }
-  .font-pct {
-    font-size: 14px;
-    color: #666;
-    min-width: 44px;
-    text-align: center;
-  }
+  .font-pct { font-size: 14px; color: #666; min-width: 44px; text-align: center; }
   textarea {
-    width: 100%;
-    min-height: 140px;
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    padding: 10px;
-    font-size: 15px;
-    resize: vertical;
-    font-family: inherit;
+    width: 100%; min-height: 140px; border: 1px solid #ddd; border-radius: 10px;
+    padding: 10px; font-size: 15px; resize: vertical; font-family: inherit;
   }
-  .hint {
-    font-size: 12px;
-    color: #888;
-    margin: 6px 0 12px;
-    line-height: 1.5;
-  }
+  .hint { font-size: 12px; color: #888; margin: 6px 0 12px; line-height: 1.5; }
   .btn {
-    display: inline-block;
-    background: #c25b3f;
-    color: #fff;
-    border: none;
-    border-radius: 10px;
-    padding: 10px 18px;
-    font-size: 15px;
-    font-weight: bold;
-    cursor: pointer;
+    display: inline-block; background: #c25b3f; color: #fff; border: none;
+    border-radius: 10px; padding: 10px 18px; font-size: 15px; font-weight: bold; cursor: pointer;
   }
   .btn:active { opacity: 0.8; }
-  .btn.secondary {
-    background: #eee;
-    color: #666;
-    margin-left: 8px;
-  }
+  .btn.secondary { background: #eee; color: #666; margin-left: 8px; }
   .card {
-    position: relative;
-    background: #fafaf8;
-    border: 2px dashed #c9c4b8;
-    border-radius: 16px;
-    padding: 18px 50px 40px 56px;
-    margin-bottom: 16px;
-    transition: opacity 0.2s;
+    position: relative; background: #fafaf8; border: 2px dashed #c9c4b8;
+    border-radius: 16px; padding: 18px 50px 40px 56px; margin-bottom: 16px; transition: opacity 0.2s;
   }
-  .card.done {
-    opacity: 0.55;
-  }
+  .card.done { opacity: 0.55; }
   .checkbox {
-    position: absolute;
-    top: 16px;
-    left: 14px;
-    width: 30px;
-    height: 30px;
-    border-radius: 8px;
-    border: 2px solid #c9c4b8;
-    background: #fff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 18px;
-    color: #fff;
-    cursor: pointer;
-    flex-shrink: 0;
+    position: absolute; top: 16px; left: 14px; width: 30px; height: 30px;
+    border-radius: 8px; border: 2px solid #c9c4b8; background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; color: #fff; cursor: pointer; flex-shrink: 0;
   }
-  .checkbox.checked {
-    background: #c25b3f;
-    border-color: #c25b3f;
-  }
+  .checkbox.checked { background: #c25b3f; border-color: #c25b3f; }
   .heading {
-    font-size: calc(20px * var(--font-scale));
-    font-weight: bold;
-    margin: 0 0 6px;
-    word-break: break-word;
+    font-size: calc(20px * var(--font-scale)); font-weight: bold; margin: 0 0 6px; word-break: break-word;
   }
-  .card.done .heading {
-    text-decoration: line-through;
-  }
+  .card.done .heading { text-decoration: line-through; }
   .body-text {
-    font-size: calc(15px * var(--font-scale));
-    line-height: 1.6;
-    white-space: pre-wrap;
-    color: #555;
-    word-break: break-word;
+    font-size: calc(15px * var(--font-scale)); line-height: 1.6; white-space: pre-wrap;
+    color: #555; word-break: break-word;
   }
   .del-btn {
-    position: absolute;
-    bottom: 12px;
-    right: 12px;
-    width: 28px;
-    height: 28px;
-    border-radius: 8px;
-    background: #4d7268;
-    border: none;
-    color: #fff;
-    font-size: 14px;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    position: absolute; bottom: 12px; right: 12px; width: 28px; height: 28px;
+    border-radius: 8px; background: #4d7268; border: none; color: #fff;
+    font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
   }
-  .empty {
-    text-align: center;
-    color: #999;
-    font-size: 14px;
-    margin-top: 30px;
-  }
+  .empty { text-align: center; color: #999; font-size: 14px; margin-top: 30px; }
+  .loading { text-align: center; color: #999; font-size: 14px; margin-top: 30px; }
 </style>
 </head>
 <body>
@@ -217,42 +109,40 @@
 </div>
 
 <div id="list"></div>
-<div class="empty" id="emptyMsg">まだメモがありません</div>
+<div class="empty" id="emptyMsg" style="display:none;">まだメモがありません</div>
+<div class="loading" id="loadingMsg">読み込み中...</div>
 
 <script>
-  const BOARDS_KEY = 'checklistBoards';
-  const CURRENT_KEY = 'checklistCurrentBoard';
+  const API_BASE = 'https://checklist-memo.noel-hazuki.workers.dev';
   const FONT_KEY = 'checklistFontScale';
-  const LEGACY_KEY = 'checklistMemos';
 
-  let boards = JSON.parse(localStorage.getItem(BOARDS_KEY) || 'null');
-  let currentBoardId = localStorage.getItem(CURRENT_KEY);
+  let boards = [];
+  let currentBoardId = null;
+  let currentMemos = [];
   let fontScale = parseFloat(localStorage.getItem(FONT_KEY) || '1');
 
-  // 初回起動 or 旧データからの移行
-  if (!boards) {
-    const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || '[]');
-    const firstBoard = { id: genId(), name: 'メモ1', memos: legacy };
-    boards = [firstBoard];
-    currentBoardId = firstBoard.id;
-    saveBoards();
-    localStorage.setItem(CURRENT_KEY, currentBoardId);
-  }
-  if (!currentBoardId || !boards.find(b => b.id === currentBoardId)) {
-    currentBoardId = boards[0].id;
-    localStorage.setItem(CURRENT_KEY, currentBoardId);
+  async function api(path, options) {
+    const res = await fetch(API_BASE + path, {
+      headers: { 'Content-Type': 'application/json' },
+      ...options,
+    });
+    if (!res.ok) throw new Error('通信エラー: ' + res.status);
+    return res.json();
   }
 
-  function genId() {
-    return Date.now() + Math.random().toString(16).slice(2);
-  }
-
-  function saveBoards() {
-    localStorage.setItem(BOARDS_KEY, JSON.stringify(boards));
-  }
-
-  function getCurrentBoard() {
-    return boards.find(b => b.id === currentBoardId);
+  async function init() {
+    try {
+      boards = await api('/boards');
+      if (boards.length === 0) {
+        const b = await api('/boards', { method: 'POST', body: JSON.stringify({ name: 'メモ1' }) });
+        boards = [b];
+      }
+      currentBoardId = boards[0].id;
+      renderBoardSelect();
+      await loadMemos();
+    } catch (e) {
+      document.getElementById('loadingMsg').textContent = '接続エラー：通信環境を確認してください';
+    }
   }
 
   function renderBoardSelect() {
@@ -267,46 +157,49 @@
     });
   }
 
-  function switchBoard(id) {
+  async function switchBoard(id) {
     currentBoardId = id;
-    localStorage.setItem(CURRENT_KEY, currentBoardId);
+    await loadMemos();
+  }
+
+  async function loadMemos() {
+    document.getElementById('loadingMsg').style.display = 'block';
+    currentMemos = await api(`/boards/${currentBoardId}/memos`);
+    document.getElementById('loadingMsg').style.display = 'none';
     render();
   }
 
-  function createBoard() {
+  async function createBoard() {
     const name = prompt('新しいボードの名前を入力してください', 'メモ' + (boards.length + 1));
     if (!name) return;
-    const b = { id: genId(), name: name.trim() || 'メモ' + (boards.length + 1), memos: [] };
+    const b = await api('/boards', { method: 'POST', body: JSON.stringify({ name: name.trim() }) });
     boards.push(b);
     currentBoardId = b.id;
-    saveBoards();
-    localStorage.setItem(CURRENT_KEY, currentBoardId);
     renderBoardSelect();
-    render();
+    await loadMemos();
   }
 
-  function renameBoard() {
-    const b = getCurrentBoard();
+  async function renameBoard() {
+    const b = boards.find(b => b.id === currentBoardId);
     const name = prompt('ボード名を変更', b.name);
     if (!name) return;
-    b.name = name.trim() || b.name;
-    saveBoards();
+    await api(`/boards/${currentBoardId}`, { method: 'PUT', body: JSON.stringify({ name: name.trim() }) });
+    b.name = name.trim();
     renderBoardSelect();
   }
 
-  function deleteBoard() {
+  async function deleteBoard() {
     if (boards.length <= 1) {
       alert('最後の1つのボードは削除できません');
       return;
     }
-    const b = getCurrentBoard();
+    const b = boards.find(b => b.id === currentBoardId);
     if (!confirm(`「${b.name}」を削除しますか？中のメモも全て消えます`)) return;
+    await api(`/boards/${currentBoardId}`, { method: 'DELETE' });
     boards = boards.filter(x => x.id !== currentBoardId);
     currentBoardId = boards[0].id;
-    saveBoards();
-    localStorage.setItem(CURRENT_KEY, currentBoardId);
     renderBoardSelect();
-    render();
+    await loadMemos();
   }
 
   function changeFont(dir) {
@@ -333,48 +226,51 @@
       heading = heading.replace(/^#+\s*/, '');
       const body = lines.join('\n').trim();
       if (heading || body) {
-        result.push({ id: genId(), heading: heading || '(無題)', body: body, done: false });
+        result.push({ heading: heading || '(無題)', body: body });
       }
     });
     return result;
   }
 
-  function addMemos() {
+  async function addMemos() {
     const text = document.getElementById('input').value;
     if (!text.trim()) return;
     const newOnes = parseInput(text);
-    const b = getCurrentBoard();
-    b.memos = b.memos.concat(newOnes);
-    saveBoards();
+    if (newOnes.length === 0) return;
+    const inserted = await api(`/boards/${currentBoardId}/memos`, {
+      method: 'POST',
+      body: JSON.stringify(newOnes),
+    });
+    currentMemos = currentMemos.concat(inserted);
     render();
     document.getElementById('input').value = '';
   }
 
-  function toggleDone(id) {
-    const b = getCurrentBoard();
-    const m = b.memos.find(m => m.id === id);
-    if (m) { m.done = !m.done; saveBoards(); render(); }
+  async function toggleDone(id) {
+    const m = currentMemos.find(m => m.id === id);
+    if (!m) return;
+    m.done = m.done ? 0 : 1;
+    render();
+    await api(`/memos/${id}`, { method: 'PATCH', body: JSON.stringify({ done: !!m.done }) });
   }
 
-  function deleteMemo(id) {
+  async function deleteMemo(id) {
     if (!confirm('このメモを削除しますか？')) return;
-    const b = getCurrentBoard();
-    b.memos = b.memos.filter(m => m.id !== id);
-    saveBoards();
+    await api(`/memos/${id}`, { method: 'DELETE' });
+    currentMemos = currentMemos.filter(m => m.id !== id);
     render();
   }
 
   function render() {
-    const b = getCurrentBoard();
     const list = document.getElementById('list');
     const emptyMsg = document.getElementById('emptyMsg');
     list.innerHTML = '';
-    if (!b.memos.length) {
+    if (!currentMemos.length) {
       emptyMsg.style.display = 'block';
       return;
     }
     emptyMsg.style.display = 'none';
-    b.memos.forEach(m => {
+    currentMemos.forEach(m => {
       const card = document.createElement('div');
       card.className = 'card' + (m.done ? ' done' : '');
       card.innerHTML = `
@@ -391,9 +287,8 @@
     return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
 
-  renderBoardSelect();
   applyFont();
-  render();
+  init();
 </script>
 
 </body>
