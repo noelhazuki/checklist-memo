@@ -1,0 +1,400 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta property="og:image" content="https://noelhazuki.github.io/claude-gallery/ogp/checklist-memo.png">
+<title>チェックリストメモ</title>
+<style>
+  :root {
+    --font-scale: 1;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: "Hiragino Kaku Gothic ProN", "Yu Gothic", sans-serif;
+    background: #f4f1ea;
+    color: #333;
+    padding: 16px;
+    padding-bottom: 60px;
+  }
+  h1 {
+    font-size: 18px;
+    margin: 4px 0 12px;
+  }
+  .panel {
+    background: #fff;
+    border-radius: 16px;
+    padding: 14px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.06);
+    margin-bottom: 16px;
+  }
+  .panel-label {
+    font-size: 12px;
+    color: #999;
+    margin-bottom: 6px;
+    font-weight: bold;
+  }
+  .board-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  select {
+    flex: 1;
+    min-width: 120px;
+    padding: 8px 10px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    font-size: 15px;
+    background: #fff;
+  }
+  .icon-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    font-size: 16px;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .icon-btn:active { opacity: 0.7; }
+  .font-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 10px;
+  }
+  .font-btn {
+    width: 38px;
+    height: 38px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    background: #fafafa;
+    font-size: 16px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .font-pct {
+    font-size: 14px;
+    color: #666;
+    min-width: 44px;
+    text-align: center;
+  }
+  textarea {
+    width: 100%;
+    min-height: 140px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    font-size: 15px;
+    resize: vertical;
+    font-family: inherit;
+  }
+  .hint {
+    font-size: 12px;
+    color: #888;
+    margin: 6px 0 12px;
+    line-height: 1.5;
+  }
+  .btn {
+    display: inline-block;
+    background: #c25b3f;
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 10px 18px;
+    font-size: 15px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  .btn:active { opacity: 0.8; }
+  .btn.secondary {
+    background: #eee;
+    color: #666;
+    margin-left: 8px;
+  }
+  .card {
+    position: relative;
+    background: #fafaf8;
+    border: 2px dashed #c9c4b8;
+    border-radius: 16px;
+    padding: 18px 50px 40px 56px;
+    margin-bottom: 16px;
+    transition: opacity 0.2s;
+  }
+  .card.done {
+    opacity: 0.55;
+  }
+  .checkbox {
+    position: absolute;
+    top: 16px;
+    left: 14px;
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 2px solid #c9c4b8;
+    background: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: #fff;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .checkbox.checked {
+    background: #c25b3f;
+    border-color: #c25b3f;
+  }
+  .heading {
+    font-size: calc(20px * var(--font-scale));
+    font-weight: bold;
+    margin: 0 0 6px;
+    word-break: break-word;
+  }
+  .card.done .heading {
+    text-decoration: line-through;
+  }
+  .body-text {
+    font-size: calc(15px * var(--font-scale));
+    line-height: 1.6;
+    white-space: pre-wrap;
+    color: #555;
+    word-break: break-word;
+  }
+  .del-btn {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: #4d7268;
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .empty {
+    text-align: center;
+    color: #999;
+    font-size: 14px;
+    margin-top: 30px;
+  }
+</style>
+</head>
+<body>
+
+<h1>📝 チェックリストメモ</h1>
+
+<div class="panel">
+  <div class="panel-label">ボード</div>
+  <div class="board-row">
+    <select id="boardSelect" onchange="switchBoard(this.value)"></select>
+    <button class="icon-btn" onclick="createBoard()" title="新規ボード">＋</button>
+    <button class="icon-btn" onclick="renameBoard()" title="名前変更">✎</button>
+    <button class="icon-btn" onclick="deleteBoard()" title="ボード削除">🗑</button>
+  </div>
+  <div class="font-row">
+    <span style="font-size:12px;color:#999;">文字サイズ</span>
+    <button class="font-btn" onclick="changeFont(-1)">－</button>
+    <span class="font-pct" id="fontPct">100%</span>
+    <button class="font-btn" onclick="changeFont(1)">＋</button>
+  </div>
+</div>
+
+<div class="panel">
+  <textarea id="input" placeholder="ここに長文を貼り付けてください。&#10;&#10;例：&#10;買い物リスト&#10;牛乳・卵・パン&#10;---&#10;病院の持ち物&#10;保険証・お薬手帳"></textarea>
+  <div class="hint">「---」（半角ハイフン3つ）の行で区切ると、それぞれ別のメモになります。各メモの1行目が自動で見出しになります。</div>
+  <button class="btn" onclick="addMemos()">メモを作成</button>
+  <button class="btn secondary" onclick="document.getElementById('input').value=''">クリア</button>
+</div>
+
+<div id="list"></div>
+<div class="empty" id="emptyMsg">まだメモがありません</div>
+
+<script>
+  const BOARDS_KEY = 'checklistBoards';
+  const CURRENT_KEY = 'checklistCurrentBoard';
+  const FONT_KEY = 'checklistFontScale';
+  const LEGACY_KEY = 'checklistMemos';
+
+  let boards = JSON.parse(localStorage.getItem(BOARDS_KEY) || 'null');
+  let currentBoardId = localStorage.getItem(CURRENT_KEY);
+  let fontScale = parseFloat(localStorage.getItem(FONT_KEY) || '1');
+
+  // 初回起動 or 旧データからの移行
+  if (!boards) {
+    const legacy = JSON.parse(localStorage.getItem(LEGACY_KEY) || '[]');
+    const firstBoard = { id: genId(), name: 'メモ1', memos: legacy };
+    boards = [firstBoard];
+    currentBoardId = firstBoard.id;
+    saveBoards();
+    localStorage.setItem(CURRENT_KEY, currentBoardId);
+  }
+  if (!currentBoardId || !boards.find(b => b.id === currentBoardId)) {
+    currentBoardId = boards[0].id;
+    localStorage.setItem(CURRENT_KEY, currentBoardId);
+  }
+
+  function genId() {
+    return Date.now() + Math.random().toString(16).slice(2);
+  }
+
+  function saveBoards() {
+    localStorage.setItem(BOARDS_KEY, JSON.stringify(boards));
+  }
+
+  function getCurrentBoard() {
+    return boards.find(b => b.id === currentBoardId);
+  }
+
+  function renderBoardSelect() {
+    const sel = document.getElementById('boardSelect');
+    sel.innerHTML = '';
+    boards.forEach(b => {
+      const opt = document.createElement('option');
+      opt.value = b.id;
+      opt.textContent = b.name;
+      if (b.id === currentBoardId) opt.selected = true;
+      sel.appendChild(opt);
+    });
+  }
+
+  function switchBoard(id) {
+    currentBoardId = id;
+    localStorage.setItem(CURRENT_KEY, currentBoardId);
+    render();
+  }
+
+  function createBoard() {
+    const name = prompt('新しいボードの名前を入力してください', 'メモ' + (boards.length + 1));
+    if (!name) return;
+    const b = { id: genId(), name: name.trim() || 'メモ' + (boards.length + 1), memos: [] };
+    boards.push(b);
+    currentBoardId = b.id;
+    saveBoards();
+    localStorage.setItem(CURRENT_KEY, currentBoardId);
+    renderBoardSelect();
+    render();
+  }
+
+  function renameBoard() {
+    const b = getCurrentBoard();
+    const name = prompt('ボード名を変更', b.name);
+    if (!name) return;
+    b.name = name.trim() || b.name;
+    saveBoards();
+    renderBoardSelect();
+  }
+
+  function deleteBoard() {
+    if (boards.length <= 1) {
+      alert('最後の1つのボードは削除できません');
+      return;
+    }
+    const b = getCurrentBoard();
+    if (!confirm(`「${b.name}」を削除しますか？中のメモも全て消えます`)) return;
+    boards = boards.filter(x => x.id !== currentBoardId);
+    currentBoardId = boards[0].id;
+    saveBoards();
+    localStorage.setItem(CURRENT_KEY, currentBoardId);
+    renderBoardSelect();
+    render();
+  }
+
+  function changeFont(dir) {
+    fontScale = Math.min(1.6, Math.max(0.7, fontScale + dir * 0.1));
+    fontScale = Math.round(fontScale * 10) / 10;
+    localStorage.setItem(FONT_KEY, fontScale);
+    applyFont();
+  }
+
+  function applyFont() {
+    document.documentElement.style.setProperty('--font-scale', fontScale);
+    document.getElementById('fontPct').textContent = Math.round(fontScale * 100) + '%';
+  }
+
+  function parseInput(text) {
+    const blocks = text.split(/\n[ \t]*(?:-{3,}|_{3,}|\*{3,})[ \t]*\n/);
+    const result = [];
+    blocks.forEach(block => {
+      const lines = block.split('\n').map(l => l.trim());
+      while (lines.length && lines[0] === '') lines.shift();
+      while (lines.length && lines[lines.length - 1] === '') lines.pop();
+      if (lines.length === 0) return;
+      let heading = lines.shift();
+      heading = heading.replace(/^#+\s*/, '');
+      const body = lines.join('\n').trim();
+      if (heading || body) {
+        result.push({ id: genId(), heading: heading || '(無題)', body: body, done: false });
+      }
+    });
+    return result;
+  }
+
+  function addMemos() {
+    const text = document.getElementById('input').value;
+    if (!text.trim()) return;
+    const newOnes = parseInput(text);
+    const b = getCurrentBoard();
+    b.memos = b.memos.concat(newOnes);
+    saveBoards();
+    render();
+    document.getElementById('input').value = '';
+  }
+
+  function toggleDone(id) {
+    const b = getCurrentBoard();
+    const m = b.memos.find(m => m.id === id);
+    if (m) { m.done = !m.done; saveBoards(); render(); }
+  }
+
+  function deleteMemo(id) {
+    if (!confirm('このメモを削除しますか？')) return;
+    const b = getCurrentBoard();
+    b.memos = b.memos.filter(m => m.id !== id);
+    saveBoards();
+    render();
+  }
+
+  function render() {
+    const b = getCurrentBoard();
+    const list = document.getElementById('list');
+    const emptyMsg = document.getElementById('emptyMsg');
+    list.innerHTML = '';
+    if (!b.memos.length) {
+      emptyMsg.style.display = 'block';
+      return;
+    }
+    emptyMsg.style.display = 'none';
+    b.memos.forEach(m => {
+      const card = document.createElement('div');
+      card.className = 'card' + (m.done ? ' done' : '');
+      card.innerHTML = `
+        <div class="checkbox ${m.done ? 'checked' : ''}" onclick="toggleDone('${m.id}')">${m.done ? '✓' : ''}</div>
+        <div class="heading">${escapeHtml(m.heading)}</div>
+        ${m.body ? `<div class="body-text">${escapeHtml(m.body)}</div>` : ''}
+        <button class="del-btn" onclick="deleteMemo('${m.id}')">×</button>
+      `;
+      list.appendChild(card);
+    });
+  }
+
+  function escapeHtml(str) {
+    return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  renderBoardSelect();
+  applyFont();
+  render();
+</script>
+
+</body>
+</html>
