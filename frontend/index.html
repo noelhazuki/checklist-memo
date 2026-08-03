@@ -65,18 +65,36 @@
   }
   .checkbox.checked { background: #c25b3f; border-color: #c25b3f; }
   .heading {
-    font-size: calc(20px * var(--font-scale)); font-weight: bold; margin: 0 0 6px; word-break: break-word;
+    font-size: calc(20px * var(--font-scale)); font-weight: bold; margin: 0 0 8px; word-break: break-word;
   }
   .card.done .heading { text-decoration: line-through; }
-  .body-text {
-    font-size: calc(15px * var(--font-scale)); line-height: 1.6; white-space: pre-wrap;
+  .items { display: flex; flex-direction: column; gap: 6px; }
+  .item {
+    display: flex; align-items: flex-start; gap: 8px; cursor: pointer;
+  }
+  .item-check {
+    width: 20px; height: 20px; border-radius: 6px; border: 2px solid #c9c4b8;
+    background: #fff; flex-shrink: 0; margin-top: 2px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px; color: #fff;
+  }
+  .item.checked .item-check { background: #4d7268; border-color: #4d7268; }
+  .item-text {
+    font-size: calc(15px * var(--font-scale)); line-height: 1.6;
     color: #555; word-break: break-word;
   }
-  .del-btn {
-    position: absolute; bottom: 12px; right: 12px; width: 28px; height: 28px;
-    border-radius: 8px; background: #4d7268; border: none; color: #fff;
+  .item.checked .item-text { text-decoration: line-through; color: #999; }
+  .card-actions {
+    position: absolute; bottom: 12px; right: 12px; display: flex; gap: 8px;
+  }
+  .del-btn, .edit-btn {
+    width: 28px; height: 28px; border-radius: 8px; border: none; color: #fff;
     font-size: 14px; cursor: pointer; display: flex; align-items: center; justify-content: center;
   }
+  .del-btn { background: #4d7268; }
+  .edit-btn { background: #a68a5b; }
+  .edit-area textarea { min-height: 100px; margin-bottom: 8px; }
+  .edit-actions { display: flex; gap: 8px; }
   .empty { text-align: center; color: #999; font-size: 14px; margin-top: 30px; }
   .loading { text-align: center; color: #999; font-size: 14px; margin-top: 30px; }
 </style>
@@ -90,6 +108,7 @@
   <div class="board-row">
     <select id="boardSelect" onchange="switchBoard(this.value)"></select>
     <button class="icon-btn" onclick="createBoard()" title="新規ボード">＋</button>
+    <button class="icon-btn" onclick="duplicateBoard()" title="このボードを複製">⧉</button>
     <button class="icon-btn" onclick="renameBoard()" title="名前変更">✎</button>
     <button class="icon-btn" onclick="deleteBoard()" title="ボード削除">🗑</button>
   </div>
@@ -103,7 +122,7 @@
 
 <div class="panel">
   <textarea id="input" placeholder="ここに長文を貼り付けてください。&#10;&#10;例：&#10;買い物リスト&#10;牛乳・卵・パン&#10;---&#10;病院の持ち物&#10;保険証・お薬手帳"></textarea>
-  <div class="hint">「---」（半角ハイフン3つ）の行で区切ると、それぞれ別のメモになります。各メモの1行目が自動で見出しになります。</div>
+  <div class="hint">「---」（半角ハイフン3つ）の行で区切ると、それぞれ別のメモになります。各メモの1行目が自動で見出しになり、2行目以降は1行ずつチェックできる項目になります。</div>
   <button class="btn" onclick="addMemos()">メモを作成</button>
   <button class="btn secondary" onclick="document.getElementById('input').value=''">クリア</button>
 </div>
@@ -120,6 +139,7 @@
   let currentBoardId = null;
   let currentMemos = [];
   let fontScale = parseFloat(localStorage.getItem(FONT_KEY) || '1');
+  let editingId = null;
 
   async function api(path, options) {
     const res = await fetch(API_BASE + path, {
@@ -159,6 +179,7 @@
 
   async function switchBoard(id) {
     currentBoardId = id;
+    editingId = null;
     await loadMemos();
   }
 
@@ -175,6 +196,25 @@
     const b = await api('/boards', { method: 'POST', body: JSON.stringify({ name: name.trim() }) });
     boards.push(b);
     currentBoardId = b.id;
+    renderBoardSelect();
+    await loadMemos();
+  }
+
+  async function duplicateBoard() {
+    const b = boards.find(b => b.id === currentBoardId);
+    const name = prompt('複製後のボード名を入力してください', b.name + ' コピー');
+    if (!name) return;
+    const memos = await api(`/boards/${currentBoardId}/memos`);
+    const newBoard = await api('/boards', { method: 'POST', body: JSON.stringify({ name: name.trim() }) });
+    boards.push(newBoard);
+    if (memos.length > 0) {
+      const items = memos
+        .slice()
+        .sort((a, b2) => (a.sort_order ?? 0) - (b2.sort_order ?? 0))
+        .map(m => ({ heading: m.heading, body: m.body }));
+      await api(`/boards/${newBoard.id}/memos`, { method: 'POST', body: JSON.stringify(items) });
+    }
+    currentBoardId = newBoard.id;
     renderBoardSelect();
     await loadMemos();
   }
@@ -246,12 +286,75 @@
     document.getElementById('input').value = '';
   }
 
+  function getBodyLines(m) {
+    return m.body ? m.body.split('\n').filter(l => l.trim() !== '') : [];
+  }
+
+  function getItemDone(m) {
+    try {
+      const arr = JSON.parse(m.item_done || '[]');
+      return Array.isArray(arr) ? arr : [];
+    } catch (e) {
+      return [];
+    }
+  }
+
   async function toggleDone(id) {
     const m = currentMemos.find(m => m.id === id);
     if (!m) return;
     m.done = m.done ? 0 : 1;
+    const lines = getBodyLines(m);
+    const items = new Array(lines.length).fill(!!m.done);
+    m.item_done = JSON.stringify(items);
     render();
-    await api(`/memos/${id}`, { method: 'PATCH', body: JSON.stringify({ done: !!m.done }) });
+    await api(`/memos/${id}`, { method: 'PATCH', body: JSON.stringify({ done: !!m.done, item_done: items }) });
+  }
+
+  async function toggleItem(id, idx) {
+    const m = currentMemos.find(m => m.id === id);
+    if (!m) return;
+    const lines = getBodyLines(m);
+    let items = getItemDone(m);
+    while (items.length < lines.length) items.push(false);
+    items[idx] = !items[idx];
+    m.item_done = JSON.stringify(items);
+    const allDone = lines.length > 0 && items.slice(0, lines.length).every(Boolean);
+    m.done = allDone ? 1 : 0;
+    render();
+    await api(`/memos/${id}`, { method: 'PATCH', body: JSON.stringify({ item_done: items, done: !!m.done }) });
+  }
+
+  function startEdit(id) {
+    editingId = id;
+    render();
+  }
+
+  function cancelEdit() {
+    editingId = null;
+    render();
+  }
+
+  async function saveEdit(id) {
+    const textarea = document.getElementById('editText_' + id);
+    const text = textarea.value;
+    const lines = text.split('\n').map(l => l.trim());
+    while (lines.length && lines[0] === '') lines.shift();
+    while (lines.length && lines[lines.length - 1] === '') lines.pop();
+    if (lines.length === 0) return;
+    const heading = lines.shift().replace(/^#+\s*/, '') || '(無題)';
+    const body = lines.join('\n').trim();
+
+    const m = currentMemos.find(m => m.id === id);
+    m.heading = heading;
+    m.body = body;
+    m.item_done = '[]';
+    m.done = 0;
+    editingId = null;
+    render();
+    await api(`/memos/${id}`, {
+      method: 'PATCH',
+      body: JSON.stringify({ heading, body, item_done: [], done: false }),
+    });
   }
 
   async function deleteMemo(id) {
@@ -273,11 +376,39 @@
     currentMemos.forEach(m => {
       const card = document.createElement('div');
       card.className = 'card' + (m.done ? ' done' : '');
+
+      if (editingId === m.id) {
+        const rawText = m.heading + (m.body ? '\n' + m.body : '');
+        card.innerHTML = `
+          <div class="edit-area">
+            <textarea id="editText_${m.id}">${escapeHtml(rawText)}</textarea>
+            <div class="edit-actions">
+              <button class="btn" onclick="saveEdit('${m.id}')">保存</button>
+              <button class="btn secondary" onclick="cancelEdit()">キャンセル</button>
+            </div>
+          </div>
+        `;
+        list.appendChild(card);
+        return;
+      }
+
+      const lines = getBodyLines(m);
+      const itemDone = getItemDone(m);
+      const itemsHtml = lines.map((line, i) => `
+        <div class="item ${itemDone[i] ? 'checked' : ''}" onclick="toggleItem('${m.id}', ${i})">
+          <div class="item-check">${itemDone[i] ? '✓' : ''}</div>
+          <div class="item-text">${escapeHtml(line)}</div>
+        </div>
+      `).join('');
+
       card.innerHTML = `
         <div class="checkbox ${m.done ? 'checked' : ''}" onclick="toggleDone('${m.id}')">${m.done ? '✓' : ''}</div>
         <div class="heading">${escapeHtml(m.heading)}</div>
-        ${m.body ? `<div class="body-text">${escapeHtml(m.body)}</div>` : ''}
-        <button class="del-btn" onclick="deleteMemo('${m.id}')">×</button>
+        <div class="items">${itemsHtml}</div>
+        <div class="card-actions">
+          <button class="edit-btn" onclick="startEdit('${m.id}')">✎</button>
+          <button class="del-btn" onclick="deleteMemo('${m.id}')">×</button>
+        </div>
       `;
       list.appendChild(card);
     });
