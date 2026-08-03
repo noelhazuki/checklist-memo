@@ -77,9 +77,9 @@ export default {
         for (const item of items) {
           const id = crypto.randomUUID();
           await env.DB.prepare(
-            "INSERT INTO memos (id, board_id, heading, body, done, sort_order, created_at) VALUES (?, ?, ?, ?, 0, ?, ?)"
+            "INSERT INTO memos (id, board_id, heading, body, done, item_done, sort_order, created_at) VALUES (?, ?, ?, ?, 0, '[]', ?, ?)"
           ).bind(id, boardId, item.heading, item.body || "", order, now).run();
-          inserted.push({ id, board_id: boardId, heading: item.heading, body: item.body || "", done: 0, sort_order: order, created_at: now });
+          inserted.push({ id, board_id: boardId, heading: item.heading, body: item.body || "", done: 0, item_done: "[]", sort_order: order, created_at: now });
           order++;
         }
         return json(inserted);
@@ -87,10 +87,35 @@ export default {
 
       const memoIdMatch = path.match(/^\/memos\/([^\/]+)$/);
       if (memoIdMatch && method === "PATCH") {
-        const { done } = await request.json();
+        const body = await request.json();
+        const fields = [];
+        const values = [];
+
+        if (body.done !== undefined) {
+          fields.push("done = ?");
+          values.push(body.done ? 1 : 0);
+        }
+        if (body.heading !== undefined) {
+          fields.push("heading = ?");
+          values.push(body.heading);
+        }
+        if (body.body !== undefined) {
+          fields.push("body = ?");
+          values.push(body.body);
+        }
+        if (body.item_done !== undefined) {
+          fields.push("item_done = ?");
+          values.push(JSON.stringify(body.item_done));
+        }
+
+        if (fields.length === 0) {
+          return json({ error: "更新する項目がありません" }, 400);
+        }
+
+        values.push(memoIdMatch[1]);
         await env.DB.prepare(
-          "UPDATE memos SET done = ? WHERE id = ?"
-        ).bind(done ? 1 : 0, memoIdMatch[1]).run();
+          `UPDATE memos SET ${fields.join(", ")} WHERE id = ?`
+        ).bind(...values).run();
         return json({ ok: true });
       }
 
