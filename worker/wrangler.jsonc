@@ -1,7 +1,7 @@
 {
   "name": "checklist-memo",
   "main": "src/index.js",
-  "compatibility_date": "2026-01-01",
+  "compatibility_date": "2025-01-01",
   "d1_databases": [
     {
       "binding": "DB",

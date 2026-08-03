@@ -1,0 +1,1 @@
+ALTER TABLE memos ADD COLUMN item_done TEXT NOT NULL DEFAULT '[]';
